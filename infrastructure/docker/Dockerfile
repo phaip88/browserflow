@@ -2,8 +2,9 @@
 # Multi-stage build shared by api/web (target: api), browser-worker/scheduler (target: worker), and all-in-one standalone.
 FROM node:22.22.1-bookworm-slim AS deps
 WORKDIR /app
-COPY package.json package-lock.json ./
-RUN --mount=type=cache,target=/root/.npm npm ci --ignore-scripts && npm rebuild argon2
+RUN apt-get update && apt-get install -y --no-install-recommends python3 make g++ && rm -rf /var/lib/apt/lists/*
+COPY package*.json ./
+RUN --mount=type=cache,target=/root/.npm if [ -f package-lock.json ]; then npm ci --ignore-scripts; else npm install --ignore-scripts; fi && npm rebuild argon2
 
 FROM deps AS build
 COPY . .
@@ -56,7 +57,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends postgresql-clie
 WORKDIR /app
 COPY --from=build --chown=browserflow:browserflow /app/.next ./.next
 COPY --from=build --chown=browserflow:browserflow /app/public ./public
-COPY --from=build --chown=browserflow:browserflow /app/node_modules ./node_modules
+COPY --from=deps --chown=browserflow:browserflow /app/node_modules ./node_modules
 COPY --chown=browserflow:browserflow package.json next.config.ts tsconfig.json drizzle.config.json ./
 COPY --chown=browserflow:browserflow src ./src
 COPY --chown=browserflow:browserflow scripts ./scripts
