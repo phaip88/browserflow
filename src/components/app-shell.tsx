@@ -14,9 +14,13 @@ function Shell({ children }: { children: React.ReactNode }) {
   const auth = useQuery({ queryKey: ["auth"], queryFn: () => api<AuthStatus>("/auth/status"), retry: false });
   useEffect(() => {
     setCsrfToken(auth.data?.csrfToken ?? null);
-    if (auth.data && !auth.data.authenticated && pathname !== "/login") router.replace("/login");
-    if (auth.data?.authenticated && pathname === "/login") router.replace("/");
-  }, [auth.data, pathname, router]);
+    if ((auth.isError || (auth.data && !auth.data.authenticated)) && pathname !== "/login") {
+      router.replace("/login");
+    }
+    if (auth.data?.authenticated && pathname === "/login") {
+      router.replace("/");
+    }
+  }, [auth.data, auth.isError, pathname, router]);
   if (pathname === "/login") return <>{children}</>;
   if (auth.isLoading || !auth.data?.authenticated) return <Spinner />;
   const logout = async () => {

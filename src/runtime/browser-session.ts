@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { chromium, type Browser, type BrowserContext, type Page } from "playwright";
+import type { Browser, BrowserContext, Page } from "playwright";
 import { config } from "@/core/config";
 import { errors } from "@/core/security";
 import { browserRequestPolicy } from "@/core/network-policy";
@@ -65,6 +65,7 @@ export class BrowserSession {
     if (config.worker.chromiumNoSandbox) args.push("--no-sandbox");
     const common = { headless: true, args, acceptDownloads: true, downloadsPath: s.downloadsDir, viewport: opts.viewport ?? { width: 1280, height: 800 }, timeout: 60_000 };
     try {
+      const { chromium } = await import("playwright");
       if (opts.profileDir) {
         fs.mkdirSync(opts.profileDir, { recursive: true });
         s.context = await chromium.launchPersistentContext(opts.profileDir, common);
