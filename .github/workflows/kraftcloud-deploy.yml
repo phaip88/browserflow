@@ -27,7 +27,7 @@ jobs:
 
       - name: Migrate Database Schema
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/browserflow?sslmode=require' }}
         run: |
           npm install --ignore-scripts
           npx drizzle-kit push --force
@@ -35,7 +35,7 @@ jobs:
       - name: Build and Deploy to Unikraft Cloud (sin)
         env:
           UKC_METRO: sin
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/browserflow?sslmode=require' }}
         run: |
           cp Dockerfile.unikraft Dockerfile
           UKC_AUTH="${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}"
