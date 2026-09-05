@@ -23,11 +23,11 @@ jobs:
       - name: Setup Unikraft CLI
         uses: unikraft/setup-action@v1
         with:
-          token: ${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}
+          token: ${{ secrets.UKC_TOKEN }}
 
       - name: Migrate Database Schema
         env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/browserflow?sslmode=require' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           npm install --ignore-scripts
           npx drizzle-kit push --force
@@ -35,17 +35,17 @@ jobs:
       - name: Build and Deploy to Unikraft Cloud (sin)
         env:
           UKC_METRO: sin
-          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/browserflow?sslmode=require' }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
         run: |
           cp Dockerfile.unikraft Dockerfile
-          UKC_AUTH="${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}"
+          UKC_AUTH="${{ secrets.UKC_TOKEN }}"
           DIGEST=$(curl -s -I -H "Authorization: Basic $UKC_AUTH" -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.oci.image.manifest.v1+json" https://unikraft.io/v2/bigboss/browserflow/manifests/latest | grep -i 'Docker-Content-Digest' | tr -d '\r' | awk '{print $2}')
           if [ -n "$DIGEST" ]; then
             echo "Pruning existing registry manifest: $DIGEST"
             curl -s -X DELETE -H "Authorization: Basic $UKC_AUTH" "https://unikraft.io/v2/bigboss/browserflow/manifests/$DIGEST" || true
           fi
           unikraft build . --output bigboss/browserflow:latest
-          curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}" -H "Content-Type: application/json" -d '[{"name":"browserflow"}]' https://api.sin.unikraft.cloud/v1/instances || true
+          curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.UKC_TOKEN }}" -H "Content-Type: application/json" -d '[{"name":"browserflow"}]' https://api.sin.unikraft.cloud/v1/instances || true
           sleep 2
           unikraft run \
             --metro sin \
