@@ -45,7 +45,8 @@ jobs:
             curl -s -X DELETE -H "Authorization: Basic $UKC_AUTH" "https://unikraft.io/v2/bigboss/browserflow/manifests/$DIGEST" || true
           fi
           unikraft build . --output bigboss/browserflow:latest
-          unikraft instance rm --metro sin -f browserflow || true
+          curl -s -X DELETE -H "Authorization: Bearer ${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}" -H "Content-Type: application/json" -d '[{"name":"browserflow"}]' https://api.sin.unikraft.cloud/v1/instances || true
+          sleep 2
           unikraft run \
             --metro sin \
             --publish 443:3000/http+tls \
