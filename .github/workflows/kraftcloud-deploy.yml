@@ -5,6 +5,7 @@ on:
   push:
     branches: [ "main" ]
     paths:
+      - "Kraftfile"
       - "Dockerfile.unikraft"
       - ".github/workflows/kraftcloud-deploy.yml"
 
@@ -29,6 +30,7 @@ jobs:
         run: |
           cp Dockerfile.unikraft Dockerfile
           unikraft build . --output bigboss/browserflow:latest
+          unikraft instance rm -f browserflow || true
           unikraft run \
             --metro sin \
             --publish 443:3000/http+tls \

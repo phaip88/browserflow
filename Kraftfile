@@ -1,0 +1,7 @@
+spec: v0.7
+
+runtime: base-compat:latest
+
+rootfs: ./Dockerfile
+
+cmd: ["/nodejs/bin/node", "/app/node_modules/next/dist/bin/next", "start", "/app", "-p", "3000"]
