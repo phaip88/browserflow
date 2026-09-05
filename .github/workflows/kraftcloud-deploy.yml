@@ -27,8 +27,8 @@ jobs:
         env:
           UKC_METRO: sin
         run: |
-          unikraft images rm bigboss/browserflow:latest || true
-          unikraft build -f Dockerfile.unikraft . --output bigboss/browserflow:latest
+          cp Dockerfile.unikraft Dockerfile
+          unikraft build . --output bigboss/browserflow:latest
           unikraft run \
             --metro sin \
             --publish 443:3000/http+tls \
