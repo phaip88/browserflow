@@ -56,6 +56,7 @@ function Editor() {
 
   useEffect(() => {
     if (flowQ.data && !def) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setDefState(flowQ.data.flow.draftDefinition);
       setFlowVersion(flowQ.data.flow.version);
     }

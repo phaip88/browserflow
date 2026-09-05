@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   push:
     branches: [ "main" ]
-    paths:
-      - "Kraftfile"
-      - "Dockerfile.unikraft"
-      - ".github/workflows/kraftcloud-deploy.yml"
 
 permissions:
   contents: read
@@ -19,14 +15,27 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Setup Unikraft CLI
         uses: unikraft/setup-action@v1
         with:
           token: ${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}
 
+      - name: Migrate Database Schema
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }}
+        run: |
+          npm install --ignore-scripts
+          npx drizzle-kit push --force
+
       - name: Build and Deploy to Unikraft Cloud (sin)
         env:
           UKC_METRO: sin
+          DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }}
         run: |
           cp Dockerfile.unikraft Dockerfile
           unikraft build . --output bigboss/browserflow:latest
@@ -39,11 +48,13 @@ jobs:
             --name browserflow \
             --env NODE_ENV=production \
             --env PORT=3000 \
+            --env HOSTNAME=0.0.0.0 \
+            --env SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
             --env BROWSERFLOW_DATA_DIR=/app/data \
             --env BROWSERFLOW_RUNTIME_DIR=/app/data/runtime \
             --env BROWSERFLOW_MASTER_KEY_FILE=/app/data/master.key \
             --env BROWSERFLOW_AUTH_MODE=authenticated \
             --env BROWSERFLOW_SECURE_COOKIES=false \
-            --env DATABASE_URL=${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }} \
+            --env DATABASE_URL="$DATABASE_URL" \
             --volume browserflow-data:/app/data \
             --image bigboss/browserflow:latest
