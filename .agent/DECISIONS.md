@@ -1,37 +1,31 @@
 # DECISIONS
 
 ## D1 — Python runtime
-
-Use Python 3.12 in production images (`python:3.12-slim-bookworm`). Local sandbox provides 3.13; code targets 3.12+ and is verified on 3.13.
+Python 3.12 images; local sandbox 3.13.
 
 ## D2 — Package layout
-
-Namespace package `browserflow` assembled from `packages/*` and `apps/{api,scheduler,browser_worker}` via setuptools `packages.find` with `namespaces = true`.
+Namespace package `browserflow` via explicit setuptools package-dir.
 
 ## D3 — Database
+PostgreSQL only. Local/dev uses 17, Compose pins 16.6.
 
-PostgreSQL 16+ only. Local/dev currently uses PostgreSQL 17. No SQLite adapter.
-
-## D4 — Redis
-
-Optional accelerator for wake-up and WebSocket fan-out. Workers and scheduler poll PostgreSQL when Redis is down.
+## D4 — Redis optional
+Workers and scheduler poll PostgreSQL.
 
 ## D5 — IDs and time
-
-UUID primary keys. All timestamps `datetime.now(timezone.utc)` stored as `timestamptz`.
+UUID PKs. `datetime.now(timezone.utc)`.
 
 ## D6 — Auth
-
-Authenticated by default. Local-only unauthenticated mode requires bind `127.0.0.1` AND explicit config flag. Argon2id passwords, HttpOnly session cookie, CSRF token.
+Authenticated default. Argon2id, HttpOnly session, CSRF cookie.
 
 ## D7 — Browser
-
-Single provider: Playwright Chromium. Default concurrency 1, configurable to 2.
+Playwright Chromium only. Concurrency 1–2.
 
 ## D8 — i18n
-
-UI supports English and Simplified Chinese with a persistent language switcher.
+en / zh switcher persisted in localStorage.
 
 ## D9 — AI Release 1
+disabled in production; fake is test-only.
 
-`disabled` in production. `fake` allowed only when `BROWSERFLOW_ENV=test`. Configuring fake in production fails startup.
+## D10 — Optimistic locking
+Integer `version` columns; worker updates also match lease_token + attempt_id.

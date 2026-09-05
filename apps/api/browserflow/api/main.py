@@ -4,11 +4,17 @@ from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
 from browserflow.api.middleware.security_headers import SecurityHeadersMiddleware
+from browserflow.api.routes import auth as auth_routes
+from browserflow.api.routes import executions as execution_routes
+from browserflow.api.routes import flows as flow_routes
 from browserflow.api.routes import health as health_routes
+from browserflow.api.routes import resources as resource_routes
+from browserflow.domain.errors import AuthError, BrowserFlowError, ConflictError, NotFoundError
 from browserflow.infrastructure.config import get_settings, require_production_secrets
 from browserflow.infrastructure.logging import configure_logging, get_logger
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 
 logger = get_logger(__name__)
 
@@ -41,6 +47,22 @@ def create_app() -> FastAPI:
         allow_headers=["Authorization", "Content-Type", "X-CSRF-Token", "X-Requested-With"],
     )
     app.include_router(health_routes.router)
+    app.include_router(auth_routes.router)
+    app.include_router(flow_routes.router)
+    app.include_router(execution_routes.router)
+    app.include_router(resource_routes.router)
+
+    @app.exception_handler(BrowserFlowError)
+    async def _bf_error(_request: Request, exc: BrowserFlowError) -> JSONResponse:
+        status = 400
+        if isinstance(exc, AuthError):
+            status = 401
+        elif isinstance(exc, NotFoundError):
+            status = 404
+        elif isinstance(exc, ConflictError):
+            status = 409
+        return JSONResponse(status_code=status, content=exc.to_dict())
+
     return app
 
 

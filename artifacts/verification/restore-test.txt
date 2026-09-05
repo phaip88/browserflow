@@ -1,0 +1,2 @@
+archive_members ['postgres.sql', '.env.example', 'manifest.json']
+dry_run_ok

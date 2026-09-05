@@ -1,0 +1,596 @@
+name: user
+services:
+  api:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.api
+      target: development
+    command:
+      - uvicorn
+      - browserflow.api.main:app
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --reload
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+      redis:
+        condition: service_healthy
+        required: true
+    environment:
+      BROWSERFLOW_AI_PROVIDER: disabled
+      BROWSERFLOW_ALLOW_LOCAL_UNAUTHENTICATED: "false"
+      BROWSERFLOW_ALLOW_PRIVATE_NETWORK: "false"
+      BROWSERFLOW_ALLOWED_ORIGINS: http://127.0.0.1:5173,http://localhost:5173
+      BROWSERFLOW_API_PORT: "8000"
+      BROWSERFLOW_ARTIFACT_DIR: ./data/artifacts
+      BROWSERFLOW_ARTIFACT_RETENTION_DAYS: "14"
+      BROWSERFLOW_AUTH_MODE: authenticated
+      BROWSERFLOW_BIND_HOST: 127.0.0.1
+      BROWSERFLOW_CSRF_COOKIE_NAME: bf_csrf
+      BROWSERFLOW_DATA_DIR: ./data
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:browserflow_dev@127.0.0.1:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:browserflow_dev@127.0.0.1:5432/browserflow
+      BROWSERFLOW_ENV: development
+      BROWSERFLOW_EVENT_RETENTION_DAYS: "30"
+      BROWSERFLOW_FLOW_TIMEOUT_SECONDS: "600"
+      BROWSERFLOW_HEARTBEAT_INTERVAL_SECONDS: "5"
+      BROWSERFLOW_LEASE_TTL_SECONDS: "30"
+      BROWSERFLOW_LOCALE: en
+      BROWSERFLOW_LOG_LEVEL: INFO
+      BROWSERFLOW_LOGIN_RATE_LIMIT_PER_MINUTE: "10"
+      BROWSERFLOW_MASTER_KEY_FILE: ./secrets/master.key
+      BROWSERFLOW_MAX_ARTIFACT_BYTES: "104857600"
+      BROWSERFLOW_MAX_BROWSER_CONCURRENCY: "1"
+      BROWSERFLOW_MAX_DOWNLOAD_BYTES: "52428800"
+      BROWSERFLOW_MAX_FOREACH_ITERATIONS: "1000"
+      BROWSERFLOW_MAX_PAGES: "8"
+      BROWSERFLOW_MAX_TOTAL_STORAGE_BYTES: "10737418240"
+      BROWSERFLOW_METRICS_ENABLED: "true"
+      BROWSERFLOW_NODE_TIMEOUT_SECONDS: "60"
+      BROWSERFLOW_OTEL_ENABLED: "false"
+      BROWSERFLOW_OTEL_EXPORTER_OTLP_ENDPOINT: ""
+      BROWSERFLOW_PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "true"
+      BROWSERFLOW_PRIVATE_NETWORK_ALLOWLIST: ""
+      BROWSERFLOW_PUBLIC_BASE_URL: http://127.0.0.1:8000
+      BROWSERFLOW_REDIS_OPTIONAL: "true"
+      BROWSERFLOW_REDIS_URL: redis://127.0.0.1:6379/0
+      BROWSERFLOW_RUNTIME_DIR: ./runtime
+      BROWSERFLOW_SCREENSHOT_INTERVAL_SECONDS: "4"
+      BROWSERFLOW_SCREENSHOT_MAX_WIDTH: "1280"
+      BROWSERFLOW_SERVICE_NAME: api
+      BROWSERFLOW_SESSION_COOKIE_NAME: bf_session
+      BROWSERFLOW_SESSION_SECRET_FILE: ./secrets/session.secret
+      BROWSERFLOW_SESSION_SECURE_COOKIE: "false"
+      BROWSERFLOW_SESSION_TTL_SECONDS: "43200"
+      BROWSERFLOW_WEB_ORIGIN: http://127.0.0.1:5173
+      BROWSERFLOW_WORKER_CAPACITY: "1"
+      BROWSERFLOW_WORKER_ID: ""
+      BROWSERFLOW_WORKER_POLL_INTERVAL_SECONDS: "2"
+      POSTGRES_PASSWORD: browserflow_dev
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8000"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/user
+        target: /app
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/user/data
+        target: /app/data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/user/secrets
+        target: /app/secrets
+        read_only: true
+        bind:
+          create_host_path: true
+  browser-worker:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.worker
+      target: development
+    command:
+      - python
+      - -m
+      - browserflow.browser_worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "2147483648"
+          pids: 256
+    environment:
+      BROWSERFLOW_AI_PROVIDER: disabled
+      BROWSERFLOW_ALLOW_LOCAL_UNAUTHENTICATED: "false"
+      BROWSERFLOW_ALLOW_PRIVATE_NETWORK: "false"
+      BROWSERFLOW_ALLOWED_ORIGINS: http://127.0.0.1:5173,http://localhost:5173
+      BROWSERFLOW_API_PORT: "8000"
+      BROWSERFLOW_ARTIFACT_DIR: ./data/artifacts
+      BROWSERFLOW_ARTIFACT_RETENTION_DAYS: "14"
+      BROWSERFLOW_AUTH_MODE: authenticated
+      BROWSERFLOW_BIND_HOST: 127.0.0.1
+      BROWSERFLOW_CSRF_COOKIE_NAME: bf_csrf
+      BROWSERFLOW_DATA_DIR: ./data
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:browserflow_dev@127.0.0.1:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:browserflow_dev@127.0.0.1:5432/browserflow
+      BROWSERFLOW_ENV: development
+      BROWSERFLOW_EVENT_RETENTION_DAYS: "30"
+      BROWSERFLOW_FLOW_TIMEOUT_SECONDS: "600"
+      BROWSERFLOW_HEARTBEAT_INTERVAL_SECONDS: "5"
+      BROWSERFLOW_LEASE_TTL_SECONDS: "30"
+      BROWSERFLOW_LOCALE: en
+      BROWSERFLOW_LOG_LEVEL: INFO
+      BROWSERFLOW_LOGIN_RATE_LIMIT_PER_MINUTE: "10"
+      BROWSERFLOW_MASTER_KEY_FILE: ./secrets/master.key
+      BROWSERFLOW_MAX_ARTIFACT_BYTES: "104857600"
+      BROWSERFLOW_MAX_BROWSER_CONCURRENCY: "1"
+      BROWSERFLOW_MAX_DOWNLOAD_BYTES: "52428800"
+      BROWSERFLOW_MAX_FOREACH_ITERATIONS: "1000"
+      BROWSERFLOW_MAX_PAGES: "8"
+      BROWSERFLOW_MAX_TOTAL_STORAGE_BYTES: "10737418240"
+      BROWSERFLOW_METRICS_ENABLED: "true"
+      BROWSERFLOW_NODE_TIMEOUT_SECONDS: "60"
+      BROWSERFLOW_OTEL_ENABLED: "false"
+      BROWSERFLOW_OTEL_EXPORTER_OTLP_ENDPOINT: ""
+      BROWSERFLOW_PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "true"
+      BROWSERFLOW_PRIVATE_NETWORK_ALLOWLIST: ""
+      BROWSERFLOW_PUBLIC_BASE_URL: http://127.0.0.1:8000
+      BROWSERFLOW_REDIS_OPTIONAL: "true"
+      BROWSERFLOW_REDIS_URL: redis://127.0.0.1:6379/0
+      BROWSERFLOW_RUNTIME_DIR: ./runtime
+      BROWSERFLOW_SCREENSHOT_INTERVAL_SECONDS: "4"
+      BROWSERFLOW_SCREENSHOT_MAX_WIDTH: "1280"
+      BROWSERFLOW_SERVICE_NAME: browser-worker
+      BROWSERFLOW_SESSION_COOKIE_NAME: bf_session
+      BROWSERFLOW_SESSION_SECRET_FILE: ./secrets/session.secret
+      BROWSERFLOW_SESSION_SECURE_COOKIE: "false"
+      BROWSERFLOW_SESSION_TTL_SECONDS: "43200"
+      BROWSERFLOW_WEB_ORIGIN: http://127.0.0.1:5173
+      BROWSERFLOW_WORKER_CAPACITY: "1"
+      BROWSERFLOW_WORKER_ID: ""
+      BROWSERFLOW_WORKER_POLL_INTERVAL_SECONDS: "2"
+      POSTGRES_PASSWORD: browserflow_dev
+    networks:
+      default: null
+    shm_size: "1073741824"
+    volumes:
+      - type: bind
+        source: /home/user
+        target: /app
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/user/data
+        target: /app/data
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/user/runtime
+        target: /app/runtime
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/user/secrets
+        target: /app/secrets
+        read_only: true
+        bind:
+          create_host_path: true
+  postgres:
+    environment:
+      POSTGRES_DB: browserflow
+      POSTGRES_PASSWORD: browserflow_dev
+      POSTGRES_USER: browserflow
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U browserflow -d browserflow
+      timeout: 5s
+      interval: 5s
+      retries: 10
+    image: postgres:16.6-alpine
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 5432
+        published: "5432"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: browserflow_pg
+        target: /var/lib/postgresql/data
+        volume: {}
+  redis:
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      timeout: 3s
+      interval: 5s
+      retries: 10
+    image: redis:7.4-alpine
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 6379
+        published: "6379"
+        protocol: tcp
+    restart: unless-stopped
+    volumes:
+      - type: volume
+        source: browserflow_redis
+        target: /data
+        volume: {}
+  scheduler:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.api
+      target: development
+    command:
+      - python
+      - -m
+      - browserflow.scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      BROWSERFLOW_AI_PROVIDER: disabled
+      BROWSERFLOW_ALLOW_LOCAL_UNAUTHENTICATED: "false"
+      BROWSERFLOW_ALLOW_PRIVATE_NETWORK: "false"
+      BROWSERFLOW_ALLOWED_ORIGINS: http://127.0.0.1:5173,http://localhost:5173
+      BROWSERFLOW_API_PORT: "8000"
+      BROWSERFLOW_ARTIFACT_DIR: ./data/artifacts
+      BROWSERFLOW_ARTIFACT_RETENTION_DAYS: "14"
+      BROWSERFLOW_AUTH_MODE: authenticated
+      BROWSERFLOW_BIND_HOST: 127.0.0.1
+      BROWSERFLOW_CSRF_COOKIE_NAME: bf_csrf
+      BROWSERFLOW_DATA_DIR: ./data
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:browserflow_dev@127.0.0.1:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:browserflow_dev@127.0.0.1:5432/browserflow
+      BROWSERFLOW_ENV: development
+      BROWSERFLOW_EVENT_RETENTION_DAYS: "30"
+      BROWSERFLOW_FLOW_TIMEOUT_SECONDS: "600"
+      BROWSERFLOW_HEARTBEAT_INTERVAL_SECONDS: "5"
+      BROWSERFLOW_LEASE_TTL_SECONDS: "30"
+      BROWSERFLOW_LOCALE: en
+      BROWSERFLOW_LOG_LEVEL: INFO
+      BROWSERFLOW_LOGIN_RATE_LIMIT_PER_MINUTE: "10"
+      BROWSERFLOW_MASTER_KEY_FILE: ./secrets/master.key
+      BROWSERFLOW_MAX_ARTIFACT_BYTES: "104857600"
+      BROWSERFLOW_MAX_BROWSER_CONCURRENCY: "1"
+      BROWSERFLOW_MAX_DOWNLOAD_BYTES: "52428800"
+      BROWSERFLOW_MAX_FOREACH_ITERATIONS: "1000"
+      BROWSERFLOW_MAX_PAGES: "8"
+      BROWSERFLOW_MAX_TOTAL_STORAGE_BYTES: "10737418240"
+      BROWSERFLOW_METRICS_ENABLED: "true"
+      BROWSERFLOW_NODE_TIMEOUT_SECONDS: "60"
+      BROWSERFLOW_OTEL_ENABLED: "false"
+      BROWSERFLOW_OTEL_EXPORTER_OTLP_ENDPOINT: ""
+      BROWSERFLOW_PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "true"
+      BROWSERFLOW_PRIVATE_NETWORK_ALLOWLIST: ""
+      BROWSERFLOW_PUBLIC_BASE_URL: http://127.0.0.1:8000
+      BROWSERFLOW_REDIS_OPTIONAL: "true"
+      BROWSERFLOW_REDIS_URL: redis://127.0.0.1:6379/0
+      BROWSERFLOW_RUNTIME_DIR: ./runtime
+      BROWSERFLOW_SCREENSHOT_INTERVAL_SECONDS: "4"
+      BROWSERFLOW_SCREENSHOT_MAX_WIDTH: "1280"
+      BROWSERFLOW_SERVICE_NAME: scheduler
+      BROWSERFLOW_SESSION_COOKIE_NAME: bf_session
+      BROWSERFLOW_SESSION_SECRET_FILE: ./secrets/session.secret
+      BROWSERFLOW_SESSION_SECURE_COOKIE: "false"
+      BROWSERFLOW_SESSION_TTL_SECONDS: "43200"
+      BROWSERFLOW_WEB_ORIGIN: http://127.0.0.1:5173
+      BROWSERFLOW_WORKER_CAPACITY: "1"
+      BROWSERFLOW_WORKER_ID: ""
+      BROWSERFLOW_WORKER_POLL_INTERVAL_SECONDS: "2"
+      POSTGRES_PASSWORD: browserflow_dev
+    networks:
+      default: null
+    volumes:
+      - type: bind
+        source: /home/user
+        target: /app
+        bind:
+          create_host_path: true
+      - type: bind
+        source: /home/user/secrets
+        target: /app/secrets
+        read_only: true
+        bind:
+          create_host_path: true
+  web:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.web
+      target: development
+    command:
+      - pnpm
+      - dev
+      - --host
+      - 0.0.0.0
+    environment:
+      VITE_API_BASE_URL: http://127.0.0.1:8000
+    networks:
+      default: null
+    ports:
+      - mode: ingress
+        target: 5173
+        published: "5173"
+        protocol: tcp
+    volumes:
+      - type: bind
+        source: /home/user/apps/web
+        target: /app
+        bind:
+          create_host_path: true
+      - type: volume
+        target: /app/node_modules
+        volume: {}
+networks:
+  default:
+    name: user_default
+volumes:
+  browserflow_pg:
+    name: user_browserflow_pg
+  browserflow_redis:
+    name: user_browserflow_redis
+name: user
+services:
+  api:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.api
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      BROWSERFLOW_ALLOW_LOCAL_UNAUTHENTICATED: "false"
+      BROWSERFLOW_AUTH_MODE: authenticated
+      BROWSERFLOW_BIND_HOST: 0.0.0.0
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:browserflow_dev@postgres:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:browserflow_dev@postgres:5432/browserflow
+      BROWSERFLOW_ENV: production
+      BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+      BROWSERFLOW_REDIS_URL: redis://redis:6379/0
+      BROWSERFLOW_SERVICE_NAME: api
+      BROWSERFLOW_SESSION_SECRET_FILE: /run/secrets/session_secret
+      BROWSERFLOW_SESSION_SECURE_COOKIE: "true"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live')
+      timeout: 5s
+      interval: 15s
+      retries: 5
+    image: browserflow-api:1.0.0
+    networks:
+      edge: null
+      internal: null
+    ports:
+      - mode: ingress
+        target: 8000
+        published: "8000"
+        protocol: tcp
+    read_only: true
+    restart: unless-stopped
+    secrets:
+      - source: master_key
+        target: /run/secrets/master_key
+      - source: session_secret
+        target: /run/secrets/session_secret
+    stop_grace_period: 30s
+    tmpfs:
+      - /tmp
+    user: 10001:10001
+    volumes:
+      - type: volume
+        source: browserflow_data
+        target: /var/lib/browserflow
+        volume: {}
+  browser-worker:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    deploy:
+      resources:
+        limits:
+          cpus: 2
+          memory: "2147483648"
+          pids: 256
+    environment:
+      BROWSERFLOW_ARTIFACT_DIR: /var/lib/browserflow/artifacts
+      BROWSERFLOW_DATA_DIR: /var/lib/browserflow
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:browserflow_dev@postgres:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:browserflow_dev@postgres:5432/browserflow
+      BROWSERFLOW_ENV: production
+      BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+      BROWSERFLOW_PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "true"
+      BROWSERFLOW_REDIS_URL: redis://redis:6379/0
+      BROWSERFLOW_RUNTIME_DIR: /tmp/browserflow-runtime
+      BROWSERFLOW_SERVICE_NAME: browser-worker
+      BROWSERFLOW_SESSION_SECRET_FILE: /run/secrets/session_secret
+    image: browserflow-worker:1.0.0
+    networks:
+      egress: null
+      internal: null
+    restart: unless-stopped
+    secrets:
+      - source: master_key
+        target: /run/secrets/master_key
+      - source: session_secret
+        target: /run/secrets/session_secret
+    security_opt:
+      - no-new-privileges:true
+    shm_size: "2147483648"
+    stop_grace_period: 40s
+    tmpfs:
+      - /tmp
+    user: 10001:10001
+    volumes:
+      - type: volume
+        source: browserflow_data
+        target: /var/lib/browserflow
+        volume: {}
+  postgres:
+    environment:
+      POSTGRES_DB: browserflow
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_USER: browserflow
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U browserflow -d browserflow
+      timeout: 5s
+      interval: 10s
+      retries: 10
+    image: postgres:16.6-alpine
+    networks:
+      internal: null
+    read_only: true
+    restart: unless-stopped
+    secrets:
+      - source: postgres_password
+        target: /run/secrets/postgres_password
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    volumes:
+      - type: volume
+        source: browserflow_pg
+        target: /var/lib/postgresql/data
+        volume: {}
+  redis:
+    command:
+      - redis-server
+      - --appendonly
+      - "yes"
+      - --save
+      - "60"
+      - "1000"
+    healthcheck:
+      test:
+        - CMD
+        - redis-cli
+        - ping
+      timeout: 3s
+      interval: 10s
+      retries: 10
+    image: redis:7.4-alpine
+    networks:
+      internal: null
+    read_only: true
+    restart: unless-stopped
+    tmpfs:
+      - /tmp
+    volumes:
+      - type: volume
+        source: browserflow_redis
+        target: /data
+        volume: {}
+  scheduler:
+    command:
+      - python
+      - -m
+      - browserflow.scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+        required: true
+    environment:
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:browserflow_dev@postgres:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:browserflow_dev@postgres:5432/browserflow
+      BROWSERFLOW_ENV: production
+      BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+      BROWSERFLOW_REDIS_URL: redis://redis:6379/0
+      BROWSERFLOW_SERVICE_NAME: scheduler
+      BROWSERFLOW_SESSION_SECRET_FILE: /run/secrets/session_secret
+    image: browserflow-api:1.0.0
+    networks:
+      internal: null
+    read_only: true
+    restart: unless-stopped
+    secrets:
+      - source: master_key
+        target: /run/secrets/master_key
+      - source: session_secret
+        target: /run/secrets/session_secret
+    stop_grace_period: 20s
+    tmpfs:
+      - /tmp
+    user: 10001:10001
+  web:
+    build:
+      context: /home/user
+      dockerfile: infrastructure/docker/Dockerfile.web
+    depends_on:
+      api:
+        condition: service_started
+        required: true
+    image: browserflow-web:1.0.0
+    networks:
+      edge: null
+    ports:
+      - mode: ingress
+        target: 8080
+        published: "8080"
+        protocol: tcp
+    read_only: true
+    restart: unless-stopped
+    tmpfs:
+      - /tmp
+    user: 10001:10001
+networks:
+  edge:
+    name: user_edge
+  egress:
+    name: user_egress
+  internal:
+    name: user_internal
+    internal: true
+volumes:
+  browserflow_data:
+    name: user_browserflow_data
+  browserflow_pg:
+    name: user_browserflow_pg
+  browserflow_redis:
+    name: user_browserflow_redis
+secrets:
+  master_key:
+    name: user_master_key
+    file: /home/user/secrets/master.key
+  postgres_password:
+    name: user_postgres_password
+    file: /home/user/secrets/postgres_password
+  session_secret:
+    name: user_session_secret
+    file: /home/user/secrets/session.secret

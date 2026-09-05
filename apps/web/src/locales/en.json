@@ -11,5 +11,20 @@
   "login.health": "API health",
   "login.healthOk": "API is live",
   "login.healthFail": "API is unreachable",
-  "common.loading": "Loading…"
+  "common.loading": "Loading…",
+  "nav.dashboard": "Dashboard",
+  "nav.executions": "Executions",
+  "nav.schedules": "Schedules",
+  "nav.credentials": "Credentials",
+  "nav.identities": "Identities",
+  "nav.templates": "Templates",
+  "nav.settings": "Settings",
+  "nav.system": "System",
+  "flows.title": "Flows",
+  "flows.create": "New flow",
+  "flows.editor": "Editor",
+  "flows.save": "Save draft",
+  "flows.publish": "Publish",
+  "flows.run": "Run",
+  "system.workers": "Workers"
 }

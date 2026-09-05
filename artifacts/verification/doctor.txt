@@ -1,0 +1,6 @@
+BrowserFlow doctor
+  env: test
+  bind: 127.0.0.1
+  master_key: True
+  session_secret: True
+  data_dir: True

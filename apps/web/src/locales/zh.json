@@ -11,5 +11,20 @@
   "login.health": "API 健康检查",
   "login.healthOk": "API 正常",
   "login.healthFail": "无法连接 API",
-  "common.loading": "加载中…"
+  "common.loading": "加载中…",
+  "nav.dashboard": "总览",
+  "nav.executions": "执行",
+  "nav.schedules": "计划",
+  "nav.credentials": "凭据",
+  "nav.identities": "身份",
+  "nav.templates": "模板",
+  "nav.settings": "设置",
+  "nav.system": "系统",
+  "flows.title": "流程",
+  "flows.create": "新建流程",
+  "flows.editor": "编辑器",
+  "flows.save": "保存草稿",
+  "flows.publish": "发布",
+  "flows.run": "运行",
+  "system.workers": "工作进程"
 }

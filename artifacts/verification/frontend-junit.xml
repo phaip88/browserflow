@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="3" failures="0" errors="0" time="0.134060311">
+    <testsuite name="src/api/health.test.ts" timestamp="2026-09-05T11:41:18.751Z" hostname="e2b.local" tests="2" failures="0" errors="0" skipped="0" time="0.002112838">
+        <testcase classname="src/api/health.test.ts" name="health helper &gt; accepts ok payload" time="0.001089382">
+        </testcase>
+        <testcase classname="src/api/health.test.ts" name="health helper &gt; rejects missing or failed payload" time="0.000182058">
+        </testcase>
+    </testsuite>
+    <testsuite name="src/components/LanguageSwitch.test.tsx" timestamp="2026-09-05T11:41:18.753Z" hostname="e2b.local" tests="1" failures="0" errors="0" skipped="0" time="0.131947473">
+        <testcase classname="src/components/LanguageSwitch.test.tsx" name="LanguageSwitch &gt; renders English and Chinese options" time="0.130586332">
+        </testcase>
+    </testsuite>
+</testsuites>

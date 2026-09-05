@@ -1,0 +1,9 @@
+{
+  "live_status": 200,
+  "live_body": {
+    "status": "ok",
+    "service": "api",
+    "time": "2026-09-05T11:40:48.397735+00:00"
+  }
+}
+smoke_test_completed

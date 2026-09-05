@@ -13,20 +13,17 @@ export default defineConfig({
     host: "0.0.0.0",
     port: 5173,
     proxy: {
-      "/api": {
-        target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000",
-        changeOrigin: true,
-        rewrite: (p) => p.replace(/^\/api/, ""),
-      },
-      "/health": {
-        target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000",
-        changeOrigin: true,
-      },
-      "/ws": {
-        target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000",
-        ws: true,
-        changeOrigin: true,
-      },
+      "/health": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/metrics": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/auth": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/flows": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/executions": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true, ws: true },
+      "/credentials": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/identities": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/schedules": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/templates": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/settings": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
+      "/system": { target: process.env.VITE_API_PROXY ?? "http://127.0.0.1:8000", changeOrigin: true },
     },
   },
   preview: {

@@ -92,6 +92,7 @@ packages = [
   "browserflow.application",
   "browserflow.infrastructure",
   "browserflow.infrastructure.db",
+  "browserflow.infrastructure.browser",
   "browserflow.flow_schema",
   "browserflow.flow_compiler",
   "browserflow.execution_contracts",
@@ -113,6 +114,7 @@ packages = [
 "browserflow.application" = "packages/application/browserflow/application"
 "browserflow.infrastructure" = "packages/infrastructure/browserflow/infrastructure"
 "browserflow.infrastructure.db" = "packages/infrastructure/browserflow/infrastructure/db"
+"browserflow.infrastructure.browser" = "packages/infrastructure/browserflow/infrastructure/browser"
 "browserflow.flow_schema" = "packages/flow_schema/browserflow/flow_schema"
 "browserflow.flow_compiler" = "packages/flow_compiler/browserflow/flow_compiler"
 "browserflow.execution_contracts" = "packages/execution_contracts/browserflow/execution_contracts"
@@ -139,6 +141,11 @@ ignore = [
   "RUF012",
   "UP017",  # project standard is datetime.now(timezone.utc)
   "ASYNC110",  # poll loops in worker/scheduler
+  "E501",  # long lines tolerated in dense domain modules
+  "SIM102",
+  "N806",
+  "S108",
+  "S202",
 ]
 
 [tool.ruff.lint.per-file-ignores]

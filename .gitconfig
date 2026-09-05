@@ -1,5 +1,0 @@
-[user]
-	name = BrowserFlow Agent
-	email = browserflow@local.dev
-[init]
-	defaultBranch = main

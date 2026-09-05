@@ -26,6 +26,8 @@ session.secret
 .docker/
 .wget-hsts
 .lesshst
+.config/
+.gitconfig
 
 # Python
 __pycache__/
