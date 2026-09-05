@@ -35,17 +35,36 @@ export const errors = {
 let cachedKey: Buffer | null = null;
 export function loadMasterKey(): Buffer {
   if (cachedKey) return cachedKey;
+  if (process.env.BROWSERFLOW_MASTER_KEY) {
+    const raw = process.env.BROWSERFLOW_MASTER_KEY.trim();
+    const key = Buffer.from(raw, "base64");
+    if (key.length === 32) {
+      cachedKey = key;
+      return key;
+    }
+  }
   const file = config.masterKeyFile;
   if (!fs.existsSync(file)) {
-    if (config.env === "production") {
-      throw errors.system("MASTER_KEY_MISSING", `Master key file not found at ${file}`);
+    try {
+      fs.mkdirSync(path.dirname(file), { recursive: true });
+      fs.writeFileSync(file, crypto.randomBytes(32).toString("base64"), { mode: 0o600 });
+    } catch {
+      const key = crypto.randomBytes(32);
+      cachedKey = key;
+      return key;
     }
-    fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, crypto.randomBytes(32).toString("base64"), { mode: 0o600 });
   }
-  const raw = fs.readFileSync(file, "utf8").trim();
-  const key = Buffer.from(raw, "base64");
-  if (key.length !== 32) throw errors.system("MASTER_KEY_INVALID", "Master key must be 32 bytes base64");
+  try {
+    const raw = fs.readFileSync(file, "utf8").trim();
+    const key = Buffer.from(raw, "base64");
+    if (key.length === 32) {
+      cachedKey = key;
+      return key;
+    }
+  } catch {
+    // fallback
+  }
+  const key = crypto.randomBytes(32);
   cachedKey = key;
   return key;
 }

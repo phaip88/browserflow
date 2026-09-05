@@ -49,10 +49,10 @@ USER browserflow
 ENTRYPOINT ["/usr/bin/tini","--"]
 CMD ["npx","tsx","worker/main.ts"]
 
-# ---------- All-in-one Standalone (API + Scheduler + Browser Worker in single container) ----------
+# ---------- All-in-one Standalone (API + Scheduler + Browser Worker + Embedded/Remote PostgreSQL) ----------
 FROM node:22.22.1-bookworm-slim AS standalone
 ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 BROWSERFLOW_EMBEDDED_SUPERVISOR=true BROWSERFLOW_SERVICE=api PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
-RUN apt-get update && apt-get install -y --no-install-recommends postgresql-client tini && rm -rf /var/lib/apt/lists/* \
+RUN apt-get update && apt-get install -y --no-install-recommends postgresql postgresql-contrib tini && rm -rf /var/lib/apt/lists/* \
  && groupadd -r browserflow && useradd -r -g browserflow -m -d /home/browserflow browserflow
 WORKDIR /app
 COPY --from=build --chown=browserflow:browserflow /app/.next ./.next
@@ -64,9 +64,9 @@ COPY --chown=browserflow:browserflow scripts ./scripts
 COPY --chown=browserflow:browserflow scheduler ./scheduler
 COPY --chown=browserflow:browserflow worker ./worker
 RUN npx playwright install --with-deps chromium && chmod -R a+rX /ms-playwright \
+ && chmod +x /app/scripts/entrypoint.sh \
  && mkdir -p /app/data /app/runtime /app/secrets && chown -R browserflow:browserflow /app/data /app/runtime /app/secrets
-USER browserflow
 EXPOSE 3000
 HEALTHCHECK --interval=30s --timeout=5s --retries=3 CMD node -e "fetch('http://127.0.0.1:3000/api/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
-ENTRYPOINT ["/usr/bin/tini","--"]
+ENTRYPOINT ["/usr/bin/tini","--","/app/scripts/entrypoint.sh"]
 CMD ["npx","next","start","-H","0.0.0.0","-p","3000"]
