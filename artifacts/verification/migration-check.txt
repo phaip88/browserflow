@@ -1,0 +1,20 @@
+app_settings
+artifacts
+audit_events
+credentials
+execution_attempts
+execution_events
+execution_leases
+executions
+flow_versions
+flows
+identities
+node_executions
+outbox_events
+schedule_fires
+schedules
+user_sessions
+users
+workers
+    [x] database: undefined
+    [✓] secretArn: 'postgresql'

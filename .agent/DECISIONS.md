@@ -1,0 +1,6 @@
+- TypeScript everywhere (see docs/adr/0001). Drizzle instead of Alembic; `drizzle-kit push` for dev, `drizzle-kit generate` for production migrations.
+- Realtime via SSE (+ pg LISTEN/NOTIFY wake-up from the outbox publisher) instead of raw WebSocket; identical replay semantics (`lastSequence`, event-id dedupe).
+- Loops are subgraphs (LOOP_BODY/LOOP_DONE); all graph cycles are compile errors. Edge `condition` is rejected in schema v1 (use control.if).
+- Templates are `{{identifier.path}}` only; no expression evaluation.
+- Redis not used; PostgreSQL polling + NOTIFY. Kept as optional in dev compose only.
+- Embedded supervisor spawns scheduler/worker as child OS processes for single-command runs; disabled in Compose.

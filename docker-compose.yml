@@ -1,0 +1,13 @@
+# Development compose: PostgreSQL + Redis (optional wake-up accelerator; system works without it).
+services:
+  postgres:
+    image: postgres:16.6-bookworm
+    environment: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: app_db }
+    ports: ["127.0.0.1:5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U postgres"], interval: 5s, timeout: 3s, retries: 20 }
+  redis:
+    image: redis:7.4-alpine
+    ports: ["127.0.0.1:6379:6379"]
+volumes:
+  pgdata: {}

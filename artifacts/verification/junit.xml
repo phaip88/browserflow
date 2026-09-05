@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<testsuites name="vitest tests" tests="66" failures="0" errors="0" time="0.148708225">
+    <testsuite name="tests/contracts/nodes.test.ts" timestamp="2026-09-04T21:53:09.106Z" hostname="e2b.local" tests="44" failures="0" errors="0" skipped="0" time="0.038521333">
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; ships all 42 Release 1 node types" time="0.004305935">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.start satisfies the SDK contract" time="0.001737453">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.end satisfies the SDK contract" time="0.000804192">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.if satisfies the SDK contract" time="0.001161176">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.foreach satisfies the SDK contract" time="0.001147473">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.wait satisfies the SDK contract" time="0.000648322">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.fail satisfies the SDK contract" time="0.001063569">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; control.return satisfies the SDK contract" time="0.00132188">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.goto satisfies the SDK contract" time="0.002480135">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.reload satisfies the SDK contract" time="0.000474787">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.title satisfies the SDK contract" time="0.000449217">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.url satisfies the SDK contract" time="0.000354237">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.screenshot satisfies the SDK contract" time="0.000794219">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.waitForURL satisfies the SDK contract" time="0.00031416">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; page.waitForLoadState satisfies the SDK contract" time="0.000594274">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.css satisfies the SDK contract" time="0.000539019">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.text satisfies the SDK contract" time="0.000417228">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.role satisfies the SDK contract" time="0.000569927">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.first satisfies the SDK contract" time="0.000274469">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.nth satisfies the SDK contract" time="0.000667387">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.count satisfies the SDK contract" time="0.000319369">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; locator.waitFor satisfies the SDK contract" time="0.000482079">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.click satisfies the SDK contract" time="0.001236296">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.fill satisfies the SDK contract" time="0.000777316">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.press satisfies the SDK contract" time="0.000670079">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.selectOption satisfies the SDK contract" time="0.000355857">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.check satisfies the SDK contract" time="0.000630728">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.innerText satisfies the SDK contract" time="0.000528216">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.textContent satisfies the SDK contract" time="0.000460495">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.getAttribute satisfies the SDK contract" time="0.000666266">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; element.isVisible satisfies the SDK contract" time="0.000362335">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.constant satisfies the SDK contract" time="0.000459547">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.setVariable satisfies the SDK contract" time="0.000332022">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.getVariable satisfies the SDK contract" time="0.000250322">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.template satisfies the SDK contract" time="0.000226695">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.jsonParse satisfies the SDK contract" time="0.000275111">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.jsonStringify satisfies the SDK contract" time="0.000579241">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.compare satisfies the SDK contract" time="0.001071851">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; data.randomString satisfies the SDK contract" time="0.000794657">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; integration.httpRequest satisfies the SDK contract" time="0.000700209">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; integration.readFile satisfies the SDK contract" time="0.000317965">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; integration.writeFile satisfies the SDK contract" time="0.000847977">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; integration.notify satisfies the SDK contract" time="0.000364173">
+        </testcase>
+        <testcase classname="tests/contracts/nodes.test.ts" name="node contracts &gt; has no implementation without catalog entry" time="0.002872936">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/compiler.test.ts" timestamp="2026-09-04T21:53:09.118Z" hostname="e2b.local" tests="10" failures="0" errors="0" skipped="0" time="0.0894665">
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; compiles a valid flow deterministically with checksums" time="0.012634108">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; rejects invalid schema" time="0.001184111">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; rejects unknown node types, duplicate ids and cycles" time="0.002542002">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; rejects illegal handles, missing required inputs, and edge conditions" time="0.001565382">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; requires locator/page inputs to be runtime bindings and checks type compatibility" time="0.000908263">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; blocks dangerous literal URLs and unsafe expressions" time="0.007083125">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; detects loop subgraph overlap and reports unreachable nodes" time="0.002040504">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; enforces node limit and loop limit" time="0.000823891">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; compiles every built-in template without errors and collects credential refs" time="0.033585817">
+        </testcase>
+        <testcase classname="tests/unit/compiler.test.ts" name="compiler &gt; handles 100-node flows quickly" time="0.025143671">
+        </testcase>
+    </testsuite>
+    <testsuite name="tests/unit/security.test.ts" timestamp="2026-09-04T21:53:09.120Z" hostname="e2b.local" tests="12" failures="0" errors="0" skipped="0" time="0.020720392">
+        <testcase classname="tests/unit/security.test.ts" name="network policy (SSRF) &gt; blocks loopback, private, link-local, metadata, CGNAT and IPv6 local" time="0.007543305">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="network policy (SSRF) &gt; normalizes decimal/hex/octal/shorthand IPv4 tricks" time="0.000635157">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="network policy (SSRF) &gt; blocks internal hostnames and schemes" time="0.001421494">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="safe path resolver &gt; accepts relative paths inside the root" time="0.000627919">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="safe path resolver &gt; rejects traversal, absolute, drive, UNC, NUL, illegal names and symlink escapes" time="0.001198925">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="safe path resolver &gt; sanitizes filenames" time="0.000450835">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="crypto &amp; redaction &gt; encrypts/decrypts with AAD binding and detects tampering" time="0.002009509">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="crypto &amp; redaction &gt; redacts sensitive keys and patterns, and scrubs registered secrets" time="0.001079629">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="crypto &amp; redaction &gt; produces canonical checksums" time="0.001177196">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="state machine &gt; allows legal and rejects illegal transitions" time="0.000550106">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="scopes &amp; templates &gt; resolves through the parent chain and isolates loop scopes" time="0.000399155">
+        </testcase>
+        <testcase classname="tests/unit/security.test.ts" name="scopes &amp; templates &gt; renders templates safely and preserves types for single placeholders" time="0.000631492">
+        </testcase>
+    </testsuite>
+</testsuites>

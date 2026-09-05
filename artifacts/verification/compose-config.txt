@@ -1,0 +1,5 @@
+docker not available in authoring sandbox; compose files: docker-compose.yml, docker-compose.production.yml (validated structurally by yaml parse below)
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ModuleNotFoundError: No module named 'yaml'
+pyyaml missing; skipped

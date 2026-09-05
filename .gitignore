@@ -1,0 +1,9 @@
+node_modules
+.next
+.env
+*.log
+data/
+runtime/
+secrets/
+coverage/
+artifacts/verification/*.tmp

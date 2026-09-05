@@ -1,0 +1,20 @@
+{
+  "ok": true,
+  "executionId": "ae95190d-7642-4494-8c91-5e384609362d",
+  "status": "SUCCEEDED",
+  "output": "BrowserFlow E2E Site @ http://127.0.0.1:3000/e2e-site/index.html",
+  "errorCode": null,
+  "errorMessage": null,
+  "nodes": [
+    "start:SUCCEEDED",
+    "goto:SUCCEEDED",
+    "title:SUCCEEDED",
+    "url:SUCCEEDED",
+    "summary:SUCCEEDED",
+    "ret:SUCCEEDED"
+  ],
+  "artifacts": 2,
+  "events": 22,
+  "durationMs": 382,
+  "browserVersion": "136.0.7103.25"
+}

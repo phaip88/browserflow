@@ -1,0 +1,72 @@
+{
+  "suite": "e2e-chromium-templates",
+  "passed": 8,
+  "failed": 0,
+  "durationSec": 14,
+  "results": [
+    {
+      "template": "page-title-url",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 370,
+      "artifacts": 2,
+      "error": null
+    },
+    {
+      "template": "form-fill",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 578,
+      "artifacts": 2,
+      "error": null
+    },
+    {
+      "template": "scheduled-screenshot",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 857,
+      "artifacts": 3,
+      "error": null
+    },
+    {
+      "template": "list-scrape",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 536,
+      "artifacts": 3,
+      "error": null
+    },
+    {
+      "template": "http-plus-page",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 438,
+      "artifacts": 2,
+      "error": null
+    },
+    {
+      "template": "file-output",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 386,
+      "artifacts": 3,
+      "error": null
+    },
+    {
+      "template": "conditional",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 409,
+      "artifacts": 2,
+      "error": null
+    },
+    {
+      "template": "foreach-data",
+      "ok": true,
+      "status": "SUCCEEDED",
+      "durationMs": 154,
+      "artifacts": 0,
+      "error": null
+    }
+  ]
+}

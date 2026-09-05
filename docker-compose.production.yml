@@ -1,0 +1,91 @@
+# Production single-host deployment. Copy .env.example to .env, create secrets/master.key (32 random bytes, base64).
+# Network egress: the `egress` network is internet-capable; the `internal` network is isolated. Pair the
+# application-layer NetworkPolicy with a host firewall / egress proxy (see docs/operations/deployment.md).
+x-common-env: &common-env
+  DATABASE_URL: postgresql://browserflow:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}@postgres:5432/browserflow
+  NODE_ENV: production
+  BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+  BROWSERFLOW_DATA_DIR: /app/data
+  BROWSERFLOW_RUNTIME_DIR: /app/runtime
+  BROWSERFLOW_EMBEDDED_SUPERVISOR: "false"
+  BROWSERFLOW_AUTH_MODE: authenticated
+  BROWSERFLOW_BIND_HOST: 0.0.0.0
+  BROWSERFLOW_SECURE_COOKIES: ${BROWSERFLOW_SECURE_COOKIES:-true}
+  BROWSERFLOW_BROWSER_CONCURRENCY: ${BROWSERFLOW_BROWSER_CONCURRENCY:-1}
+  BROWSERFLOW_NETWORK_PRIVATE_ALLOWLIST: ${BROWSERFLOW_NETWORK_PRIVATE_ALLOWLIST:-}
+
+services:
+  postgres:
+    image: postgres:16.6-bookworm
+    restart: unless-stopped
+    environment: { POSTGRES_USER: browserflow, POSTGRES_PASSWORD: "${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}", POSTGRES_DB: browserflow }
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [internal]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U browserflow"], interval: 10s, timeout: 5s, retries: 12 }
+    security_opt: [no-new-privileges:true]
+
+  migrate:
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile, target: api }
+    command: ["npx", "drizzle-kit", "push", "--force"]
+    environment: *common-env
+    networks: [internal]
+    depends_on: { postgres: { condition: service_healthy } }
+    restart: "no"
+
+  api:
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile, target: api }
+    restart: unless-stopped
+    environment: *common-env
+    secrets: [master_key]
+    volumes: [appdata:/app/data, runtime:/app/runtime]
+    networks: [internal, egress]
+    ports: ["${BROWSERFLOW_HTTP_BIND:-127.0.0.1}:${BROWSERFLOW_HTTP_PORT:-3000}:3000"]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+    read_only: true
+    tmpfs: [/tmp, /app/.next/cache]
+    security_opt: [no-new-privileges:true]
+    deploy: { resources: { limits: { cpus: "1.0", memory: 768M, pids: 256 } } }
+    stop_grace_period: 30s
+
+  scheduler:
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile, target: worker }
+    command: ["npx", "tsx", "scheduler/main.ts"]
+    restart: unless-stopped
+    environment: { <<: *common-env, BROWSERFLOW_SERVICE: scheduler }
+    secrets: [master_key]
+    volumes: [appdata:/app/data, runtime:/app/runtime]
+    networks: [internal]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    deploy: { resources: { limits: { cpus: "0.5", memory: 384M, pids: 128 } } }
+    stop_grace_period: 20s
+
+  browser-worker:
+    build: { context: ., dockerfile: infrastructure/docker/Dockerfile, target: worker }
+    restart: unless-stopped
+    environment: { <<: *common-env, BROWSERFLOW_SERVICE: browser-worker, BROWSERFLOW_CHROMIUM_NO_SANDBOX: "true" }
+    secrets: [master_key]
+    volumes: [appdata:/app/data, runtime:/app/runtime]
+    networks: [internal, egress]
+    depends_on: { migrate: { condition: service_completed_successfully } }
+    shm_size: "1gb"
+    read_only: true
+    tmpfs: [/tmp, /home/browserflow/.cache]
+    security_opt: [no-new-privileges:true, seccomp:unconfined]
+    deploy: { resources: { limits: { cpus: "2.0", memory: 2G, pids: 1024 } } }
+    stop_grace_period: 45s
+
+secrets:
+  master_key:
+    file: ./secrets/master.key
+
+networks:
+  internal: { internal: true }
+  egress: {}
+
+volumes:
+  pgdata: {}
+  appdata: {}
+  runtime: {}

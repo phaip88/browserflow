@@ -1,0 +1,3 @@
+- Docker is not installed in the authoring sandbox: `make docker-build` / `make compose-validate` could not be executed here (Dockerfile and compose files are written and reviewed; CI runs them).
+- No pnpm/Python toolchain requirement fulfilled as specified (see ADR-0001) — architecture and guarantees preserved in TypeScript.
+- Coverage instrumentation (`@vitest/coverage-v8`) and SBOM tooling were not installed in-sandbox; CI workflow generates the SBOM.

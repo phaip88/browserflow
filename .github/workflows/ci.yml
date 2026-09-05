@@ -1,0 +1,27 @@
+name: ci
+on: { push: { branches: [main, "feat/**"] }, pull_request: {} }
+permissions: { contents: read }
+jobs:
+  verify:
+    runs-on: ubuntu-24.04
+    services:
+      postgres:
+        image: postgres:16.6-bookworm
+        env: { POSTGRES_USER: postgres, POSTGRES_PASSWORD: postgres, POSTGRES_DB: app_db }
+        ports: ["5432:5432"]
+        options: --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    env: { DATABASE_URL: "postgresql://postgres:postgres@127.0.0.1:5432/app_db" }
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
+        with: { node-version: "22.22.1", cache: npm }
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium
+      - run: npx drizzle-kit push --force
+      - run: make typecheck lint test test-contracts test-security build smoke-test
+      - uses: gitleaks/gitleaks-action@83373cf2f8c4db6e24b41c1a9b086bb9619e9cd3 # v2.3.7
+        env: { GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}" }
+      - uses: anchore/sbom-action@f325610c9f50a54015d37c8d16cb3b0e2c8f4de0 # v0.18.0
+        with: { format: cyclonedx-json, output-file: artifacts/verification/sbom.cdx.json }
+      - uses: actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882 # v4.4.3
+        with: { name: verification, path: artifacts/verification }
