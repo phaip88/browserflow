@@ -45,7 +45,7 @@ jobs:
             curl -s -X DELETE -H "Authorization: Basic $UKC_AUTH" "https://unikraft.io/v2/bigboss/browserflow/manifests/$DIGEST" || true
           fi
           unikraft build . --output bigboss/browserflow:latest
-          unikraft instance rm -f browserflow || true
+          unikraft instance rm --metro sin -f browserflow || true
           unikraft run \
             --metro sin \
             --publish 443:3000/http+tls \
