@@ -2,8 +2,8 @@ node_modules
 .next
 .env
 *.log
-data/
-runtime/
-secrets/
+/data/
+/runtime/
+/secrets/
 coverage/
 artifacts/verification/*.tmp
