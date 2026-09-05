@@ -186,6 +186,7 @@ export class BrowserSession {
 /** Cached periodic self-check used by readiness (never launches per request). */
 export async function browserSelfCheck(): Promise<{ ok: boolean; version: string | null; error?: string }> {
   try {
+    const { chromium } = await import("playwright");
     const b = await chromium.launch({ headless: true, args: config.worker.chromiumNoSandbox ? ["--no-sandbox", "--disable-dev-shm-usage"] : ["--disable-dev-shm-usage"], timeout: 30_000 });
     const v = b.version();
     await b.close();
