@@ -38,9 +38,12 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }}
         run: |
           cp Dockerfile.unikraft Dockerfile
-          unikraft image rm --metro fra -f 5af16201-9163-4260-8790-bf39bc119d3c || true
-          unikraft image rm -f 5af16201-9163-4260-8790-bf39bc119d3c || true
-          unikraft image rm -f bigboss/browserflow:latest || true
+          UKC_AUTH="${{ secrets.UKC_TOKEN || 'cm9ib3QkYmlnYm9zcy51c2Vycy5rcmFmdGNsb3VkOnBpYk5rVGRhS1dwaTNDNzlUN0xFZ1RGMVpyV1BzdmhS' }}"
+          DIGEST=$(curl -s -I -H "Authorization: Basic $UKC_AUTH" -H "Accept: application/vnd.oci.image.index.v1+json, application/vnd.oci.image.manifest.v1+json" https://unikraft.io/v2/bigboss/browserflow/manifests/latest | grep -i 'Docker-Content-Digest' | tr -d '\r' | awk '{print $2}')
+          if [ -n "$DIGEST" ]; then
+            echo "Pruning existing registry manifest: $DIGEST"
+            curl -s -X DELETE -H "Authorization: Basic $UKC_AUTH" "https://unikraft.io/v2/bigboss/browserflow/manifests/$DIGEST" || true
+          fi
           unikraft build . --output bigboss/browserflow:latest
           unikraft instance rm -f browserflow || true
           unikraft run \
