@@ -12,7 +12,7 @@ import { createCredential, updateCredential, identityDirs } from "@/runtime/serv
 import { createExecution } from "@/execution/service";
 import { audit } from "@/auth/service";
 import { AI_TOOL_SCHEMAS, getAIProvider } from "@/ai/provider";
-import { PLAYWRIGHT_VERSION } from "@/runtime/browser-session";
+const PLAYWRIGHT_VERSION = "1.52.0";
 import { NODE_REGISTRY_VERSION } from "@/nodes/catalog";
 
 // ---------------- schedules ----------------
