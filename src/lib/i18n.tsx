@@ -1,5 +1,5 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, useMemo } from "react";
+import React, { createContext, useContext, useState, useCallback, useMemo } from "react";
 
 export type Language = "zh" | "en";
 
@@ -392,35 +392,33 @@ const I18nContext = createContext<I18nContextType>({
   t: (key: string, fallback?: string) => fallback ?? key,
 });
 
+function getInitialLang(): Language {
+  if (typeof window === "undefined") return "zh";
+  try {
+    const saved = localStorage.getItem("bf_lang") as Language | null;
+    if (saved === "zh" || saved === "en") return saved;
+  } catch {}
+  return "zh";
+}
+
 export function I18nProvider({ children }: { children: React.ReactNode }) {
-  const [lang, setLangState] = useState<Language>("zh");
+  const [lang, setLangState] = useState<Language>(getInitialLang);
 
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("bf_lang") as Language | null;
-      if (saved === "zh" || saved === "en") {
-        setLangState(saved);
-      } else {
-        // 默认匹配中文语境
-        setLangState("zh");
-      }
-    } catch {
-      // 忽略客户端本地存储异常
-    }
-  }, []);
-
-  const setLang = (l: Language) => {
+  const setLang = useCallback((l: Language) => {
     setLangState(l);
     try {
       localStorage.setItem("bf_lang", l);
     } catch {}
-  };
+  }, []);
 
-  const t = (key: string, fallback?: string): string => {
-    return DICTIONARY[lang]?.[key] ?? fallback ?? DICTIONARY.en[key] ?? key;
-  };
+  const t = useCallback(
+    (key: string, fallback?: string): string => {
+      return DICTIONARY[lang]?.[key] ?? fallback ?? DICTIONARY.en[key] ?? key;
+    },
+    [lang]
+  );
 
-  const val = useMemo(() => ({ lang, setLang, t }), [lang]);
+  const val = useMemo(() => ({ lang, setLang, t }), [lang, setLang, t]);
 
   return <I18nContext.Provider value={val}>{children}</I18nContext.Provider>;
 }
