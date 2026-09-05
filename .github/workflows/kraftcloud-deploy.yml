@@ -38,10 +38,9 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL || 'postgresql://neondb_owner:npg_Y5MmzoWV6Pqk@ep-soft-field-b24t46yc.c-6.eu-central-1.aws.neon.tech/neondb?sslmode=require' }}
         run: |
           cp Dockerfile.unikraft Dockerfile
-          unikraft image list || true
+          unikraft image rm --metro fra -f 5af16201-9163-4260-8790-bf39bc119d3c || true
           unikraft image rm -f 5af16201-9163-4260-8790-bf39bc119d3c || true
           unikraft image rm -f bigboss/browserflow:latest || true
-          unikraft image prune -f || true
           unikraft build . --output bigboss/browserflow:latest
           unikraft instance rm -f browserflow || true
           unikraft run \

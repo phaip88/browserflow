@@ -10,7 +10,9 @@ WORKDIR /app
 ENV NEXT_TELEMETRY_DISABLED=1 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/app_db
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+RUN rm -rf node_modules/playwright node_modules/playwright-core node_modules/@playwright node_modules/vitest
 RUN npm run build
+RUN rm -rf .next/standalone/node_modules/.cache
 
 FROM gcr.io/distroless/nodejs22-debian12:latest AS runtime
 WORKDIR /app
