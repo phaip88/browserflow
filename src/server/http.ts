@@ -66,6 +66,24 @@ function corsHeaders(req: Request): Record<string, string> {
   return { "access-control-allow-origin": origin, "access-control-allow-credentials": "true", "access-control-allow-headers": `content-type, ${CSRF_HEADER}`, "access-control-allow-methods": "GET,POST,PUT,PATCH,DELETE,OPTIONS", vary: "origin" };
 }
 
+export function isAllowedOrigin(req: Request, url: URL): boolean {
+  const origin = req.headers.get("origin");
+  if (!origin) return true;
+  if (origin === url.origin) return true;
+  if (config.corsOrigins.includes(origin)) return true;
+  try {
+    const originUrl = new URL(origin);
+    const forwardedHost = req.headers.get("x-forwarded-host") || req.headers.get("host");
+    if (forwardedHost) {
+      const hostWithoutPort = forwardedHost.split(":")[0];
+      if (originUrl.host === forwardedHost || originUrl.hostname === hostWithoutPort) {
+        return true;
+      }
+    }
+  } catch {}
+  return false;
+}
+
 export async function dispatch(req: Request): Promise<Response> {
   const url = new URL(req.url);
   const path = url.pathname.replace(/^\/api/, "") || "/";
@@ -88,8 +106,7 @@ export async function dispatch(req: Request): Promise<Response> {
         if (!session) throw new BFError("AUTH", "UNAUTHENTICATED", "Authentication required", 401);
         if (!["GET", "HEAD"].includes(req.method)) {
           // CSRF: same-site strict cookie + explicit header token; also reject cross-origin browsers
-          const origin = req.headers.get("origin");
-          if (origin && origin !== url.origin && !config.corsOrigins.includes(origin)) throw new BFError("AUTH", "ORIGIN", "Cross-origin request rejected", 403);
+          if (!isAllowedOrigin(req, url)) throw new BFError("AUTH", "ORIGIN", "Cross-origin request rejected", 403);
           verifyCsrf(session, req.headers.get(CSRF_HEADER));
         }
       }

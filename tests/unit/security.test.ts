@@ -7,6 +7,7 @@ import { resolveSafePath, sanitizeFilename, encryptJson, decryptJson, checksumOf
 import { redact, registerSecretValue, scrubKnownSecrets } from "@/core/logger";
 import { canTransition, assertTransition, isTerminal } from "@/execution/core";
 import { Scope, renderTemplate, toBoolean } from "@/nodes/sdk";
+import { isAllowedOrigin } from "@/server/http";
 
 describe("network policy (SSRF)", () => {
   it("blocks loopback, private, link-local, metadata, CGNAT and IPv6 local", () => {
@@ -122,5 +123,41 @@ describe("scopes & templates", () => {
     expect(toBoolean("false")).toBe(false);
     expect(toBoolean([])).toBe(false);
     expect(toBoolean("yes")).toBe(true);
+  });
+});
+
+describe("CSRF origin validation", () => {
+  it("accepts same-origin and proxy-forwarded hosts, rejects cross-origin", () => {
+    const url = new URL("http://0.0.0.0:3000/api/flows");
+
+    const reqDirect = new Request("http://0.0.0.0:3000/api/flows", {
+      headers: { origin: "http://0.0.0.0:3000" },
+    });
+    expect(isAllowedOrigin(reqDirect, url)).toBe(true);
+
+    const reqProxy = new Request("http://0.0.0.0:3000/api/flows", {
+      headers: {
+        origin: "https://my-app.sin.unikraft.app",
+        "x-forwarded-host": "my-app.sin.unikraft.app",
+        "x-forwarded-proto": "https",
+      },
+    });
+    expect(isAllowedOrigin(reqProxy, url)).toBe(true);
+
+    const reqHost = new Request("http://0.0.0.0:3000/api/flows", {
+      headers: {
+        origin: "https://my-app.sin.unikraft.app",
+        host: "my-app.sin.unikraft.app",
+      },
+    });
+    expect(isAllowedOrigin(reqHost, url)).toBe(true);
+
+    const reqEvil = new Request("http://0.0.0.0:3000/api/flows", {
+      headers: {
+        origin: "https://evil.com",
+        "x-forwarded-host": "my-app.sin.unikraft.app",
+      },
+    });
+    expect(isAllowedOrigin(reqEvil, url)).toBe(false);
   });
 });
