@@ -18,6 +18,5 @@ ENV NODE_ENV=production NEXT_TELEMETRY_DISABLED=1 PORT=3000 HOSTNAME=0.0.0.0 BRO
 COPY --from=build /app/public ./public
 COPY --from=build /app/.next/standalone ./
 COPY --from=build /app/.next/static ./.next/static
-COPY --from=deps /app/node_modules/playwright-core/browsers.json ./node_modules/playwright-core/browsers.json
 EXPOSE 3000
 CMD ["server.js"]
