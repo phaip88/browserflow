@@ -37,4 +37,9 @@ export function ErrorText({ error }: { error: unknown }) {
 export function Modal({ title, onClose, children }: { title: string; onClose: () => void; children: React.ReactNode }) {
   return <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30" onClick={onClose}><div className="max-h-[90vh] w-full max-w-lg overflow-auto rounded-lg bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}><div className="mb-3 flex items-center justify-between"><h3 className="font-semibold">{title}</h3><button onClick={onClose} className="text-gray-400 hover:text-gray-700">✕</button></div>{children}</div></div>;
 }
-export const Spinner = () => <div className="py-8 text-center text-sm text-gray-400">Loading…</div>;
+import { useI18n } from "@/lib/i18n";
+
+export const Spinner = () => {
+  const { t } = useI18n();
+  return <div className="py-8 text-center text-sm text-gray-400">{t("common.loading", "Loading…")}</div>;
+};

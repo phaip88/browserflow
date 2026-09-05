@@ -4,10 +4,12 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import { api, fmtDate, queryClient, type FlowSummary } from "@/lib/api";
+import { useI18n } from "@/lib/i18n";
 import { Badge, Button, Card, ErrorText, Field, Input, Modal, PageHeader, Select, Table } from "@/components/ui";
 
 export default function FlowsPage() {
   const router = useRouter();
+  const { t } = useI18n();
   const [q, setQ] = useState("");
   const [sort, setSort] = useState("updated");
   const [archived, setArchived] = useState(false);
@@ -19,7 +21,7 @@ export default function FlowsPage() {
   const create = useMutation({ mutationFn: () => api<{ flow: FlowSummary }>("/flows", { method: "POST", body: { name } }), onSuccess: (r) => { refresh(); router.push(`/flows/${r.flow.id}`); } });
   const act = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: string }) => {
-      if (action === "delete") { if (!confirm("Delete this flow and all its executions?")) return; await api(`/flows/${id}`, { method: "DELETE" }); }
+      if (action === "delete") { if (!confirm(t("flows.deleteConfirm", "Delete this flow and all its executions?"))) return; await api(`/flows/${id}`, { method: "DELETE" }); }
       else if (action === "archive") await api(`/flows/${id}`, { method: "PATCH", body: { archived: true } });
       else if (action === "unarchive") await api(`/flows/${id}`, { method: "PATCH", body: { archived: false } });
       else if (action === "duplicate") await api(`/flows/${id}/duplicate`, { method: "POST", body: {} });
@@ -38,18 +40,135 @@ export default function FlowsPage() {
   });
   return (
     <div>
-      <PageHeader title="Flows" subtitle="Drafts, published versions and executions" actions={<><label className="cursor-pointer rounded border border-gray-300 bg-white px-3 py-1.5 text-sm">Import JSON<input type="file" accept="application/json" className="hidden" onChange={(e) => { setImporting(e.target.files?.[0] ?? null); setTimeout(() => doImport.mutate(), 0); }} /></label><Button onClick={() => setCreating(true)}>New flow</Button></>} />
+      <PageHeader
+        title={t("flows.title", "Flows")}
+        subtitle={t("flows.subtitle", "Drafts, published versions and executions")}
+        actions={
+          <>
+            <label className="cursor-pointer rounded border border-gray-300 bg-white px-3 py-1.5 text-sm hover:bg-gray-50 transition">
+              {t("flows.importJson", "Import JSON")}
+              <input
+                type="file"
+                accept="application/json"
+                className="hidden"
+                onChange={(e) => {
+                  setImporting(e.target.files?.[0] ?? null);
+                  setTimeout(() => doImport.mutate(), 0);
+                }}
+              />
+            </label>
+            <Button onClick={() => setCreating(true)}>
+              {t("flows.newFlow", "New flow")}
+            </Button>
+          </>
+        }
+      />
       <ErrorText error={act.error ?? doImport.error} />
       <Card>
-        <div className="mb-3 flex gap-2"><Input placeholder="Search flows…" value={q} onChange={(e) => setQ(e.target.value)} className="max-w-xs" /><Select value={sort} onChange={(e) => setSort(e.target.value)} className="!w-40"><option value="updated">Recently updated</option><option value="created">Recently created</option><option value="name">Name</option></Select><label className="flex items-center gap-1 text-sm"><input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} /> Archived</label></div>
-        <Table rows={list.data?.flows ?? []} rowKey={(f) => f.id} empty="No flows yet — create one or start from a template." cols={[
-          { h: "Name", c: (f) => <div><Link className="font-medium text-indigo-600" href={`/flows/${f.id}`}>{f.name}</Link><div className="text-xs text-gray-500">{f.description}</div></div> },
-          { h: "Published", c: (f) => (f.currentVersionId ? <Badge status="SUCCEEDED">published</Badge> : <Badge>draft only</Badge>) },
-          { h: "Updated", c: (f) => fmtDate(f.updatedAt) },
-          { h: "", c: (f) => <div className="flex flex-wrap gap-1">{f.currentVersionId && !f.archivedAt && <Button variant="secondary" onClick={() => act.mutate({ id: f.id, action: "run" })}>Run</Button>}<Button variant="ghost" onClick={() => act.mutate({ id: f.id, action: "duplicate" })}>Duplicate</Button><a className="rounded px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100" href={`/api/flows/${f.id}/export`}>Export</a><Button variant="ghost" onClick={() => act.mutate({ id: f.id, action: f.archivedAt ? "unarchive" : "archive" })}>{f.archivedAt ? "Unarchive" : "Archive"}</Button><Button variant="ghost" className="text-red-600" onClick={() => act.mutate({ id: f.id, action: "delete" })}>Delete</Button></div> },
-        ]} />
+        <div className="mb-3 flex gap-2">
+          <Input
+            placeholder={t("flows.searchPlaceholder", "Search flows…")}
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="max-w-xs"
+          />
+          <Select value={sort} onChange={(e) => setSort(e.target.value)} className="!w-40">
+            <option value="updated">{t("flows.sortUpdated", "Recently updated")}</option>
+            <option value="created">{t("flows.sortCreated", "Recently created")}</option>
+            <option value="name">{t("flows.sortName", "Name")}</option>
+          </Select>
+          <label className="flex items-center gap-1 text-sm text-gray-700">
+            <input type="checkbox" checked={archived} onChange={(e) => setArchived(e.target.checked)} />
+            {t("flows.archived", "Archived")}
+          </label>
+        </div>
+        <Table
+          rows={list.data?.flows ?? []}
+          rowKey={(f) => f.id}
+          empty={t("flows.empty", "No flows yet — create one or start from a template.")}
+          cols={[
+            {
+              h: t("flows.colName", "Name"),
+              c: (f) => (
+                <div>
+                  <Link className="font-medium text-indigo-600 hover:underline" href={`/flows/${f.id}`}>
+                    {f.name}
+                  </Link>
+                  <div className="text-xs text-gray-500">{f.description}</div>
+                </div>
+              ),
+            },
+            {
+              h: t("flows.colPublished", "Published"),
+              c: (f) =>
+                f.currentVersionId ? (
+                  <Badge status="SUCCEEDED">{t("flows.published", "published")}</Badge>
+                ) : (
+                  <Badge>{t("flows.draftOnly", "draft only")}</Badge>
+                ),
+            },
+            { h: t("flows.colUpdated", "Updated"), c: (f) => fmtDate(f.updatedAt) },
+            {
+              h: "",
+              c: (f) => (
+                <div className="flex flex-wrap gap-1">
+                  {f.currentVersionId && !f.archivedAt && (
+                    <Button variant="secondary" onClick={() => act.mutate({ id: f.id, action: "run" })}>
+                      {t("common.run", "Run")}
+                    </Button>
+                  )}
+                  <Button variant="ghost" onClick={() => act.mutate({ id: f.id, action: "duplicate" })}>
+                    {t("flows.duplicate", "Duplicate")}
+                  </Button>
+                  <a
+                    className="rounded px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+                    href={`/api/flows/${f.id}/export`}
+                  >
+                    {t("flows.export", "Export")}
+                  </a>
+                  <Button
+                    variant="ghost"
+                    onClick={() => act.mutate({ id: f.id, action: f.archivedAt ? "unarchive" : "archive" })}
+                  >
+                    {f.archivedAt ? t("flows.unarchive", "Unarchive") : t("flows.archive", "Archive")}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="text-red-600 hover:bg-red-50"
+                    onClick={() => act.mutate({ id: f.id, action: "delete" })}
+                  >
+                    {t("common.delete", "Delete")}
+                  </Button>
+                </div>
+              ),
+            },
+          ]}
+        />
       </Card>
-      {creating && <Modal title="New flow" onClose={() => setCreating(false)}><form onSubmit={(e) => { e.preventDefault(); create.mutate(); }} className="space-y-3"><Field label="Name"><Input autoFocus required value={name} onChange={(e) => setName(e.target.value)} /></Field><ErrorText error={create.error} /><div className="flex justify-end gap-2"><Button variant="secondary" type="button" onClick={() => setCreating(false)}>Cancel</Button><Button type="submit" disabled={create.isPending}>Create</Button></div></form></Modal>}
+      {creating && (
+        <Modal title={t("flows.modalTitle", "New flow")} onClose={() => setCreating(false)}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              create.mutate();
+            }}
+            className="space-y-3"
+          >
+            <Field label={t("flows.modalName", "Name")}>
+              <Input autoFocus required value={name} onChange={(e) => setName(e.target.value)} />
+            </Field>
+            <ErrorText error={create.error} />
+            <div className="flex justify-end gap-2">
+              <Button variant="secondary" type="button" onClick={() => setCreating(false)}>
+                {t("common.cancel", "Cancel")}
+              </Button>
+              <Button type="submit" disabled={create.isPending}>
+                {t("common.create", "Create")}
+              </Button>
+            </div>
+          </form>
+        </Modal>
+      )}
     </div>
   );
 }
