@@ -50,6 +50,7 @@ jobs:
             --env PORT=3000 \
             --env HOSTNAME=0.0.0.0 \
             --env SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt \
+            --env BROWSERFLOW_EMBEDDED_SUPERVISOR=false \
             --env BROWSERFLOW_DATA_DIR=/app/data \
             --env BROWSERFLOW_RUNTIME_DIR=/app/data/runtime \
             --env BROWSERFLOW_MASTER_KEY_FILE=/app/data/master.key \
