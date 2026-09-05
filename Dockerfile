@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/root/.npm if [ -f package-lock.json ]; then npm c
 
 FROM deps AS build
 COPY . .
-ENV NEXT_TELEMETRY_DISABLED=1
+ENV NEXT_TELEMETRY_DISABLED=1 DATABASE_URL=postgresql://postgres:postgres@127.0.0.1:5432/app_db
 RUN npm run build
 
 # ---------- API / Web (no browser binaries) ----------
