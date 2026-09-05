@@ -1,0 +1,111 @@
+services:
+  postgres:
+    image: postgres:16.6-alpine
+    environment:
+      POSTGRES_USER: browserflow
+      POSTGRES_PASSWORD: browserflow_dev
+      POSTGRES_DB: browserflow
+    ports:
+      - "5432:5432"
+    volumes:
+      - browserflow_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U browserflow -d browserflow"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.4-alpine
+    ports:
+      - "6379:6379"
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - browserflow_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+      target: development
+    env_file: .env
+    environment:
+      BROWSERFLOW_SERVICE_NAME: api
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+      - ./secrets:/app/secrets:ro
+    command: ["uvicorn", "browserflow.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+
+  scheduler:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+      target: development
+    env_file: .env
+    environment:
+      BROWSERFLOW_SERVICE_NAME: scheduler
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./:/app
+      - ./secrets:/app/secrets:ro
+    command: ["python", "-m", "browserflow.scheduler"]
+
+  browser-worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.worker
+      target: development
+    env_file: .env
+    environment:
+      BROWSERFLOW_SERVICE_NAME: browser-worker
+    depends_on:
+      postgres:
+        condition: service_healthy
+    shm_size: "1gb"
+    volumes:
+      - ./:/app
+      - ./data:/app/data
+      - ./runtime:/app/runtime
+      - ./secrets:/app/secrets:ro
+    command: ["python", "-m", "browserflow.browser_worker"]
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+          pids: 256
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.web
+      target: development
+    environment:
+      VITE_API_BASE_URL: http://127.0.0.1:8000
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./apps/web:/app
+      - /app/node_modules
+    command: ["pnpm", "dev", "--host", "0.0.0.0"]
+
+volumes:
+  browserflow_pg:
+  browserflow_redis:

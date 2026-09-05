@@ -1,0 +1,187 @@
+services:
+  postgres:
+    image: postgres:16.6-alpine
+    environment:
+      POSTGRES_USER: browserflow
+      POSTGRES_PASSWORD_FILE: /run/secrets/postgres_password
+      POSTGRES_DB: browserflow
+    volumes:
+      - browserflow_pg:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U browserflow -d browserflow"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+      - /var/run/postgresql
+    secrets:
+      - postgres_password
+    networks:
+      - internal
+
+  redis:
+    image: redis:7.4-alpine
+    command: ["redis-server", "--appendonly", "yes", "--save", "60", "1000"]
+    volumes:
+      - browserflow_redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      - internal
+
+  api:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.api
+    image: browserflow-api:1.0.0
+    environment:
+      BROWSERFLOW_SERVICE_NAME: api
+      BROWSERFLOW_ENV: production
+      BROWSERFLOW_BIND_HOST: 0.0.0.0
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:${POSTGRES_PASSWORD}@postgres:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:${POSTGRES_PASSWORD}@postgres:5432/browserflow
+      BROWSERFLOW_REDIS_URL: redis://redis:6379/0
+      BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+      BROWSERFLOW_SESSION_SECRET_FILE: /run/secrets/session_secret
+      BROWSERFLOW_AUTH_MODE: authenticated
+      BROWSERFLOW_ALLOW_LOCAL_UNAUTHENTICATED: "false"
+      BROWSERFLOW_SESSION_SECURE_COOKIE: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - browserflow_data:/var/lib/browserflow
+    read_only: true
+    tmpfs:
+      - /tmp
+    secrets:
+      - master_key
+      - session_secret
+    user: "10001:10001"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    networks:
+      - internal
+      - edge
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health/live')"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+
+  scheduler:
+    image: browserflow-api:1.0.0
+    environment:
+      BROWSERFLOW_SERVICE_NAME: scheduler
+      BROWSERFLOW_ENV: production
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:${POSTGRES_PASSWORD}@postgres:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:${POSTGRES_PASSWORD}@postgres:5432/browserflow
+      BROWSERFLOW_REDIS_URL: redis://redis:6379/0
+      BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+      BROWSERFLOW_SESSION_SECRET_FILE: /run/secrets/session_secret
+    depends_on:
+      postgres:
+        condition: service_healthy
+    command: ["python", "-m", "browserflow.scheduler"]
+    secrets:
+      - master_key
+      - session_secret
+    user: "10001:10001"
+    restart: unless-stopped
+    stop_grace_period: 20s
+    networks:
+      - internal
+    read_only: true
+    tmpfs:
+      - /tmp
+
+  browser-worker:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.worker
+    image: browserflow-worker:1.0.0
+    environment:
+      BROWSERFLOW_SERVICE_NAME: browser-worker
+      BROWSERFLOW_ENV: production
+      BROWSERFLOW_DATABASE_URL: postgresql+asyncpg://browserflow:${POSTGRES_PASSWORD}@postgres:5432/browserflow
+      BROWSERFLOW_DATABASE_URL_SYNC: postgresql://browserflow:${POSTGRES_PASSWORD}@postgres:5432/browserflow
+      BROWSERFLOW_REDIS_URL: redis://redis:6379/0
+      BROWSERFLOW_MASTER_KEY_FILE: /run/secrets/master_key
+      BROWSERFLOW_SESSION_SECRET_FILE: /run/secrets/session_secret
+      BROWSERFLOW_DATA_DIR: /var/lib/browserflow
+      BROWSERFLOW_RUNTIME_DIR: /tmp/browserflow-runtime
+      BROWSERFLOW_ARTIFACT_DIR: /var/lib/browserflow/artifacts
+      BROWSERFLOW_PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - browserflow_data:/var/lib/browserflow
+    shm_size: "2gb"
+    secrets:
+      - master_key
+      - session_secret
+    user: "10001:10001"
+    restart: unless-stopped
+    stop_grace_period: 40s
+    deploy:
+      resources:
+        limits:
+          cpus: "2.0"
+          memory: 2G
+          pids: 256
+    security_opt:
+      - no-new-privileges:true
+    networks:
+      - internal
+      - egress
+    tmpfs:
+      - /tmp
+
+  web:
+    build:
+      context: .
+      dockerfile: infrastructure/docker/Dockerfile.web
+    image: browserflow-web:1.0.0
+    ports:
+      - "8080:8080"
+    depends_on:
+      - api
+    user: "10001:10001"
+    restart: unless-stopped
+    read_only: true
+    tmpfs:
+      - /tmp
+    networks:
+      - edge
+
+secrets:
+  postgres_password:
+    file: ./secrets/postgres_password
+  master_key:
+    file: ./secrets/master.key
+  session_secret:
+    file: ./secrets/session.secret
+
+volumes:
+  browserflow_pg:
+  browserflow_redis:
+  browserflow_data:
+
+networks:
+  internal:
+    internal: true
+  edge:
+  egress:

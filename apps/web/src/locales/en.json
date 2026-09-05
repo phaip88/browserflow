@@ -1,0 +1,15 @@
+{
+  "app.tagline": "Self-hosted visual browser automation",
+  "app.selfHosted": "Single-user production platform",
+  "language.en": "English",
+  "language.zh": "中文",
+  "login.title": "Sign in",
+  "login.subtitle": "Initialize or authenticate the local administrator.",
+  "login.email": "Email",
+  "login.password": "Password",
+  "login.submit": "Continue",
+  "login.health": "API health",
+  "login.healthOk": "API is live",
+  "login.healthFail": "API is unreachable",
+  "common.loading": "Loading…"
+}

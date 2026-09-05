@@ -1,0 +1,44 @@
+# syntax=docker/dockerfile:1.7
+FROM python:3.12.8-slim-bookworm AS base
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PYTHONPATH=/app/packages/domain:/app/packages/application:/app/packages/infrastructure:/app/packages/flow_schema:/app/packages/flow_compiler:/app/packages/execution_contracts:/app/packages/node_sdk:/app/packages/node_pack_browser:/app/packages/node_pack_control:/app/packages/node_pack_data:/app/packages/node_pack_integration:/app/packages/cli:/app/apps/api:/app/apps/scheduler:/app/apps/browser_worker
+RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin browserflow \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends libpq5 curl \
+    && rm -rf /var/lib/apt/lists/*
+
+FROM base AS development
+WORKDIR /app
+COPY pyproject.toml README.md /app/
+COPY packages /app/packages
+COPY apps /app/apps
+COPY migrations /app/migrations
+COPY alembic.ini /app/alembic.ini
+RUN pip install --no-cache-dir -e ".[dev]"
+USER browserflow
+EXPOSE 8000
+CMD ["uvicorn", "browserflow.api.main:app", "--host", "0.0.0.0", "--port", "8000"]
+
+FROM base AS builder
+WORKDIR /app
+COPY pyproject.toml README.md /app/
+COPY packages /app/packages
+COPY apps /app/apps
+COPY migrations /app/migrations
+COPY alembic.ini /app/alembic.ini
+RUN pip install --no-cache-dir --prefix=/install .
+
+FROM base AS production
+WORKDIR /app
+COPY --from=builder /install /usr/local
+COPY packages /app/packages
+COPY apps /app/apps
+COPY migrations /app/migrations
+COPY alembic.ini /app/alembic.ini
+COPY scripts /app/scripts
+USER browserflow
+EXPOSE 8000
+STOPSIGNAL SIGTERM
+CMD ["uvicorn", "browserflow.api.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1"]

@@ -1,0 +1,17 @@
+{
+  "name": "browserflow",
+  "version": "1.0.0",
+  "private": true,
+  "description": "BrowserFlow monorepo",
+  "scripts": {
+    "web:dev": "pnpm --filter @browserflow/web dev",
+    "web:build": "pnpm --filter @browserflow/web build",
+    "web:test": "pnpm --filter @browserflow/web test",
+    "web:typecheck": "pnpm --filter @browserflow/web typecheck",
+    "web:lint": "pnpm --filter @browserflow/web lint"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20.18.0"
+  }
+}

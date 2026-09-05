@@ -1,0 +1,27 @@
+# syntax=docker/dockerfile:1.7
+FROM node:20.18.0-bookworm-slim AS development
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+COPY apps/web/package.json /app/package.json
+RUN pnpm install
+COPY apps/web /app
+EXPOSE 5173
+CMD ["pnpm", "dev", "--host", "0.0.0.0"]
+
+FROM node:20.18.0-bookworm-slim AS build
+WORKDIR /app
+RUN corepack enable && corepack prepare pnpm@9.15.9 --activate
+COPY pnpm-workspace.yaml package.json /src/
+COPY apps/web /src/apps/web
+WORKDIR /src
+RUN pnpm install --frozen-lockfile --filter @browserflow/web... \
+    && pnpm --filter @browserflow/web build
+
+FROM python:3.12.8-slim-bookworm AS production
+WORKDIR /srv
+RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin browserflow
+COPY --from=build /src/apps/web/dist /srv/dist
+COPY infrastructure/docker/static_server.py /srv/static_server.py
+USER browserflow
+EXPOSE 8080
+CMD ["python", "/srv/static_server.py"]

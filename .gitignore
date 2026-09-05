@@ -1,0 +1,88 @@
+# Secrets and env
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+secrets/
+master.key
+session.secret
+*.secret
+
+# Home / sandbox clutter (repo root is the user home)
+.cache/
+.local/
+.npm/
+.corepack/
+.profile
+.zshrc
+.bashrc
+.bash_history
+.python_history
+.sudo_as_admin_successful
+.ipython/
+.jupyter/
+.cursor/
+.docker/
+.wget-hsts
+.lesshst
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+env/
+*.egg-info/
+.eggs/
+dist/
+build/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.coverage
+htmlcov/
+coverage.xml
+.tox/
+.nox/
+
+# Node
+node_modules/
+.pnpm-store/
+apps/web/dist/
+apps/web/coverage/
+*.tsbuildinfo
+
+# Data and runtime
+data/
+runtime/
+artifacts/local/
+*.sqlite
+*.db
+
+# IDE
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# OS
+Thumbs.db
+
+# Test / tool
+.playwright-report/
+test-results/
+playwright-report/
+
+# Agent scratch
+.agent/*.tmp
+
+# Docker
+docker-data/
+
+# Logs
+*.log
+logs/

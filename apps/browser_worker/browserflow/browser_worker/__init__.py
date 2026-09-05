@@ -1,0 +1,1 @@
+"""Independent browser worker process."""

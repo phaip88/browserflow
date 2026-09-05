@@ -1,0 +1,15 @@
+{
+  "app.tagline": "自托管可视化浏览器自动化",
+  "app.selfHosted": "单用户生产级平台",
+  "language.en": "English",
+  "language.zh": "中文",
+  "login.title": "登录",
+  "login.subtitle": "初始化或验证本地管理员账户。",
+  "login.email": "邮箱",
+  "login.password": "密码",
+  "login.submit": "继续",
+  "login.health": "API 健康检查",
+  "login.healthOk": "API 正常",
+  "login.healthFail": "无法连接 API",
+  "common.loading": "加载中…"
+}

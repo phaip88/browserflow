@@ -1,0 +1,48 @@
+# syntax=docker/dockerfile:1.7
+FROM python:3.12.8-slim-bookworm AS base
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PLAYWRIGHT_BROWSERS_PATH=/opt/playwright \
+    BROWSERFLOW_PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=true \
+    PYTHONPATH=/app/packages/domain:/app/packages/application:/app/packages/infrastructure:/app/packages/flow_schema:/app/packages/flow_compiler:/app/packages/execution_contracts:/app/packages/node_sdk:/app/packages/node_pack_browser:/app/packages/node_pack_control:/app/packages/node_pack_data:/app/packages/node_pack_integration:/app/packages/cli:/app/apps/api:/app/apps/scheduler:/app/apps/browser_worker
+RUN useradd --create-home --uid 10001 --shell /usr/sbin/nologin browserflow
+
+FROM base AS development
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+      libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+      libgbm1 libasound2 libpango-1.0-0 libcairo2 libatspi2.0-0 \
+      libxshmfence1 fonts-liberation libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+COPY pyproject.toml README.md /app/
+COPY packages /app/packages
+COPY apps /app/apps
+COPY migrations /app/migrations
+COPY alembic.ini /app/alembic.ini
+RUN pip install --no-cache-dir -e ".[dev]" \
+    && python -m playwright install chromium \
+    && python -m playwright install-deps chromium || true
+USER browserflow
+CMD ["python", "-m", "browserflow.browser_worker"]
+
+FROM base AS production
+WORKDIR /app
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      libnss3 libnspr4 libatk1.0-0 libatk-bridge2.0-0 libcups2 libdrm2 \
+      libxkbcommon0 libxcomposite1 libxdamage1 libxfixes3 libxrandr2 \
+      libgbm1 libasound2 libpango-1.0-0 libcairo2 libatspi2.0-0 \
+      libxshmfence1 fonts-liberation libpq5 \
+    && rm -rf /var/lib/apt/lists/*
+COPY pyproject.toml README.md /app/
+COPY packages /app/packages
+COPY apps /app/apps
+COPY migrations /app/migrations
+COPY alembic.ini /app/alembic.ini
+COPY scripts /app/scripts
+RUN pip install --no-cache-dir . \
+    && python -m playwright install chromium \
+    && chown -R browserflow:browserflow /opt/playwright /app
+USER browserflow
+STOPSIGNAL SIGTERM
+CMD ["python", "-m", "browserflow.browser_worker"]
